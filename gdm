@@ -1,0 +1,84 @@
+#!/usr/local/bin/python3.7m
+
+from RPLCD.i2c import CharLCD
+import urllib.request, json
+from datetime import datetime
+from time import sleep
+
+
+def space(string):
+    while len(string) < 19:
+        string = string + ' '
+    #print(f'String: "{string}"')
+    return string
+
+
+def heartbeat(stime):
+    while stime != 0:
+        lcd.cursor_pos = (0, 14)
+        lcd.write(32)
+        sleep(.1)
+        lcd.cursor_pos = (0, 14)
+        lcd.write(58)
+        sleep(.9)
+        stime -= 1
+
+
+def templine(data):
+    global switch
+    lcd.cursor_pos = (2, 0)
+    if switch == 1:
+        switch = 0
+        lcd.write_string(f'T: {data["temptrend"]}')
+        lcd.write(223)
+        lcd.write_string(f'F  H: {data["humiditytrend"]}%')
+    else:
+        switch = 1
+        lcd.write_string(f'T: {data["tempc"]}')
+        lcd.write(223)
+        lcd.write_string(f'F  H: {data["humidity"]}%')
+
+
+
+def displaydata(data):
+    datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
+    ts = datetime_object.strftime("%b %d %Y %I:%M%p")
+    lcd.cursor_pos = (0, 0)
+    lcd.write_string(ts)
+    lcd.cursor_pos = (1, 0)
+    if int(data["darkness"]) < 300000:
+        lcd.write_string(space(f'Lights ON ({data["lightscale"]}/100)'))
+    else:
+        lcd.write_string(space(f'Lights OFF  ({data["lightscale"]}/100)'))
+    templine(data)
+    lcd.cursor_pos = (3, 0)
+    if not data['hasalarms']:
+        lcd.write_string(space('     No Alerts'))
+    else:
+        lcd.write_string(space(f'ALERT: '))
+    #print(data)
+
+
+lcd = CharLCD('PCF8574', 0x27)
+lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=False, backlight_enabled=True)
+
+lcd.clear()
+
+lcd.cursor_pos = (1, 0)
+lcd.write_string('Waiting for data...')
+
+switch = 0
+
+while True:
+    try:
+        with urllib.request.urlopen("http://10.1.10.74/data") as url:
+            data = json.loads(url.read().decode())
+    except:
+        print('Error getting remote data')
+        heartbeat(60)
+
+    else:
+        displaydata(data)
+        for a in range(6):
+            heartbeat(10)
+            templine(data)
