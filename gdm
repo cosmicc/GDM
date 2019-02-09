@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3.7m
 
+import sys
 from RPLCD.i2c import CharLCD
 import urllib.request, json
 from datetime import datetime
@@ -9,9 +10,9 @@ from loguru import logger as log
 logfile = '/var/log/gdm.log'
 
 log.configure(
-    handlers=[dict(sink=sys.stderr, level="ERROR", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
-              dict(sink=logfile, level="WARNING", enqueue=True, serialize=False, rotation="50 KB", retention="30 days", compression="gz"),
-              levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")], extra={"common_to_all": "default"}, activation=[("my_module.secret", False), ("another_library.module", True)])
+    handlers=[dict(sink=sys.stdout, level="ERROR", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
+              dict(sink=logfile, level="WARNING", enqueue=True, serialize=False, rotation="50 KB", retention="30 days", compression="gz")],
+              levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")])
 
 def space(string):
     while len(string) < 19:
@@ -77,7 +78,7 @@ def displaydata(data):
     else:
         log.debug(data)
 
-log.startup('GDM is starting up')
+log.log('STARTUP', 'GDM is starting up')
 log.info(f'Initilizing LCD display')
 lcd = CharLCD('PCF8574', 0x27)
 lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=False, backlight_enabled=True)
