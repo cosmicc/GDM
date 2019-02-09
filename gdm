@@ -4,66 +4,87 @@ from RPLCD.i2c import CharLCD
 import urllib.request, json
 from datetime import datetime
 from time import sleep
+from loguru import logger as log
 
+logfile = '/var/log/gdm.log'
+
+log.configure(
+    handlers=[dict(sink=sys.stderr, level="ERROR", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
+              dict(sink=logfile, level="INFO", enqueue=True, serialize=False, rotation="50 KB", retention="30 days", compression="gz"),
+              levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")], extra={"common_to_all": "default"}, activation=[("my_module.secret", False), ("another_library.module", True)])
 
 def space(string):
     while len(string) < 19:
         string = string + ' '
-    #print(f'String: "{string}"')
+    log.debug(f'String padding: "{string}"')
     return string
 
 
 def heartbeat(stime):
-    while stime != 0:
-        lcd.cursor_pos = (0, 14)
-        lcd.write(32)
-        sleep(.1)
-        lcd.cursor_pos = (0, 14)
-        lcd.write(58)
-        sleep(.9)
-        stime -= 1
+    try:
+        while stime != 0:
+            lcd.cursor_pos = (0, 14)
+            lcd.write(32)
+            sleep(.1)
+            lcd.cursor_pos = (0, 14)
+            lcd.write(58)
+            sleep(.9)
+            stime -= 1
+    except:
+        log.exception(f'Exception in heatbeat()')
 
 
 def templine(data):
     global switch
-    lcd.cursor_pos = (2, 0)
-    if switch == 1:
-        switch = 0
-        lcd.write_string(f'T: {data["temptrend"]}')
-        lcd.write(223)
-        lcd.write_string(f'F  H: {data["humiditytrend"]}%')
-    else:
-        switch = 1
-        lcd.write_string(f'T: {data["tempc"]}')
-        lcd.write(223)
-        lcd.write_string(f'F  H: {data["humidity"]}%')
+    log.debug(f'Switching Temp Line Data: {data}')
+    try:
+        lcd.cursor_pos = (2, 0)
+        if switch == 1:
+            switch = 0
+            lcd.write_string(f'T: {data["temptrend"]}')
+            lcd.write(223)
+            lcd.write_string(f'F  H: {data["humiditytrend"]}%')
+        else:
+            switch = 1
+            lcd.write_string(f'T: {data["tempc"]}')
+            lcd.write(223)
+            lcd.write_string(f'F  H: {data["humidity"]}%')
+    except:
+        log.exception(f'Exception in templine()')
 
 
 
 def displaydata(data):
-    datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
-    ts = datetime_object.strftime("%b %d %Y %I:%M%p")
-    lcd.cursor_pos = (0, 0)
-    lcd.write_string(ts)
-    lcd.cursor_pos = (1, 0)
-    if int(data["darkness"]) < 300000:
-        lcd.write_string(space(f'Lights ON ({data["lightscale"]}/100)'))
+    log.info(f'Displaying new data: {data}')
+    try:
+        datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
+        ts = datetime_object.strftime("%b %d %Y %I:%M%p")
+        lcd.cursor_pos = (0, 0)
+        lcd.write_string(ts)
+        lcd.cursor_pos = (1, 0)
+        if int(data["darkness"]) < 300000:
+            lcd.write_string(space(f'Lights ON ({data["lightscale"]}/100)'))
+        else:
+            lcd.write_string(space(f'Lights OFF  ({data["lightscale"]}/100)'))
+        templine(data)
+        lcd.cursor_pos = (3, 0)
+        if not data['hasalarms']:
+            lcd.write_string(space('     No Alerts'))
+        else:
+            lcd.write_string(space(f'ALERT: '))
+    except:
+        log.exception(f'Exception in displaydata()')
     else:
-        lcd.write_string(space(f'Lights OFF  ({data["lightscale"]}/100)'))
-    templine(data)
-    lcd.cursor_pos = (3, 0)
-    if not data['hasalarms']:
-        lcd.write_string(space('     No Alerts'))
-    else:
-        lcd.write_string(space(f'ALERT: '))
-    #print(data)
+        log.debug(data)
 
-
+log.info(f'Initilizing LCD display')
 lcd = CharLCD('PCF8574', 0x27)
 lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=False, backlight_enabled=True)
 
+log.debug(f'Clearing LCD display')
 lcd.clear()
 
+log.info(f'Waiting for data...')
 lcd.cursor_pos = (1, 0)
 lcd.write_string('Waiting for data...')
 
@@ -71,14 +92,18 @@ switch = 0
 
 while True:
     try:
+        log.debug('Attempting to retrieve data')
         with urllib.request.urlopen("http://10.1.10.74/data") as url:
             data = json.loads(url.read().decode())
     except:
-        print('Error getting remote data')
+        log.error('Error getting remote data')
         heartbeat(60)
 
     else:
-        displaydata(data)
-        for a in range(6):
-            heartbeat(10)
-            templine(data)
+        try:
+            displaydata(data)
+            for a in range(6):
+                heartbeat(10)
+                templine(data)
+        except:
+            log.exception(f'Exception in main loop')
