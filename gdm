@@ -1,18 +1,46 @@
 #!/usr/local/bin/python3.7m
 
+import json
+import socket
 import sys
-from RPLCD.i2c import CharLCD
-import urllib.request, json
+import urllib.request
 from datetime import datetime
 from time import sleep
+
 from loguru import logger as log
+from RPLCD.i2c import CharLCD
 
 logfile = '/var/log/gdm.log'
 
 log.configure(
     handlers=[dict(sink=sys.stdout, level="ERROR", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
               dict(sink=logfile, level="WARNING", enqueue=True, serialize=False, rotation="50 KB", retention="30 days", compression="gz")],
-              levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")])
+    levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")])
+
+
+def discover_gsm():
+    log.info(f'Waiting for data...')
+    lcd.cursor_pos = (1, 0)
+    lcd.write_string('Searching for Sensor')
+    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)  # UDP
+    client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    client.settimeout(5)
+    client.bind(("", 37030))
+    found = False
+    while not found:
+        client.sendto(b'GSM_DISCOVER', ('255.255.255.255', 37020))
+        log.debug(f'Sent GSM_DISCOVER broadcast')
+        (data, addr) = client.recvfrom(1024)
+        log.info(f"Found GSM: {data.decode()} from {addr[0]}")
+        found = True
+    lcd.cursor_pos = (1, 0)
+    lcd.write_string('Found Sensor:')
+    lcd.cursor_pos = (2, 0)
+    lcd.write_string(f'{addr[0]}')
+    sleep(5)
+    return addr[0]
+
 
 def space(string):
     while len(string) < 19:
@@ -54,7 +82,6 @@ def templine(data):
         log.exception(f'Exception in templine()')
 
 
-
 def displaydata(data):
     log.info(f'Displaying new data: {data}')
     try:
@@ -78,6 +105,7 @@ def displaydata(data):
     else:
         log.debug(data)
 
+
 log.log('STARTUP', 'GDM is starting up')
 log.info(f'Initilizing LCD display')
 lcd = CharLCD('PCF8574', 0x27)
@@ -86,9 +114,8 @@ lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dot
 log.debug(f'Clearing LCD display')
 lcd.clear()
 
-log.info(f'Waiting for data...')
-lcd.cursor_pos = (1, 0)
-lcd.write_string('Waiting for data...')
+
+ipaddr = discover_gsm()
 
 switch = 0
 
