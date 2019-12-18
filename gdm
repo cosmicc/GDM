@@ -22,7 +22,16 @@ def writeline(line, text, clear=False):
     if clear:
         lcd.clear()
     lcd.cursor_pos = (line - 1, 0)
-    lcd.write_string('{:*^20}'.format(a))
+    textlen = len(str(text))
+    if textlen < 19:
+        lcd.write_string('{: ^20}'.format(str(text)))
+    elif textlen == 19:
+        lcd.write_string(f'{str(text)} ') 
+    elif textlen == 20:
+        lcd.write_string(str(text))
+    else:
+        log.error('LCD string length error')
+    lcd.home()
 
 
 def discover_gsm():
@@ -44,7 +53,7 @@ def discover_gsm():
         else:
             log.info(f"Found GSM: {data.decode()} from {addr[0]}")
             found = True
-    writeline(2, 'Found Sensor:')
+    writeline(2, 'Found Sensor')
     writeline(3, f'{addr[0]}')
     sleep(10)
     return addr[0]
@@ -117,7 +126,7 @@ def displaydata(data):
 log.log('STARTUP', 'GDM is starting up')
 log.info(f'Initilizing LCD display')
 lcd = CharLCD('PCF8574', 0x27)
-lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=False, backlight_enabled=True)
+lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=True, backlight_enabled=True)
 
 log.debug(f'Clearing LCD display')
 lcd.clear()
