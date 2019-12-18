@@ -81,7 +81,7 @@ def disphumiditydata(data):
     writeline(4, f'{data["humidity"]}%  {data["humiditytrend"]}%')
 
 
-def displaytime():
+def displaytime(data):
     # datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
     if not data['hasalarms']:
         datetime_object = datetime.now()
@@ -115,7 +115,6 @@ firstrun = True
 while True:
     if errorcount > 5:
         ipaddr = discover_gsm()
-    displaytime()
     try:
         log.debug('Attempting to retrieve data')
         with urllib.request.urlopen(f"http://{ipaddr}/data") as url:
@@ -132,8 +131,9 @@ while True:
         errorcount = 0
         firstrun = False
         try:
-            displightdata()
-            disptempdata()
-            disphumiditydata()
+            displaytime(data)
+            displightdata(data)
+            disptempdata(data)
+            disphumiditydata(data)
         except:
             log.exception(f'Exception in main loop')
