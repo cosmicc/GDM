@@ -103,9 +103,8 @@ def displaydata(data):
     log.info(f'Displaying new data: {data}')
     try:
         datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
-        ts = datetime_object.strftime("%b %d %Y %I:%M%p")
-        lcd.cursor_pos = (0, 0)
-        lcd.write_string(ts)
+        ts = datetime_object.strftime("%a, %b %d %I:%M %p")
+        writeline(1, ts)
         lcd.cursor_pos = (1, 0)
         if int(data["darkness"]) < 300000:
             writeline(2, f'Lights ON ({data["lightscale"]}/100)')
