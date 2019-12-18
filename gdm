@@ -74,11 +74,11 @@ def heartbeat(stime):
 
 
 def disptempdata(data):
-    writeline(3, f'{data["tempc"]}oF  {data["temptrend"]}oF')
+    writeline(3, f'Tmp: {data["tempc"]}oF  {data["temptrend"]}oF')
 
 
 def disphumiditydata(data):
-    writeline(4, f'{data["humidity"]}%  {data["humiditytrend"]}%')
+    writeline(4, f'Hum: {data["humidity"]}%  {data["humiditytrend"]}%')
 
 
 def displaytime(data):
