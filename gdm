@@ -20,6 +20,7 @@ log.configure(
 
 def discover_gsm():
     log.info(f'Waiting for data...')
+    lcd.clear()
     lcd.cursor_pos = (1, 0)
     lcd.write_string('Searching for Sensor')
     client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)  # UDP
@@ -34,6 +35,7 @@ def discover_gsm():
         (data, addr) = client.recvfrom(1024)
         log.info(f"Found GSM: {data.decode()} from {addr[0]}")
         found = True
+    lcd.clear()
     lcd.cursor_pos = (1, 0)
     lcd.write_string('Found Sensor:')
     lcd.cursor_pos = (2, 0)
