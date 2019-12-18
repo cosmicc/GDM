@@ -27,7 +27,7 @@ def writeline(line, text, clear=False):
 
 def discover_gsm():
     log.info(f'Searching for Sensor...')
-    lcd.writeline(2, 'Searching for Sensor')
+    writeline(2, 'Searching for Sensor', True)
     client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)  # UDP
     client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -44,8 +44,8 @@ def discover_gsm():
         else:
             log.info(f"Found GSM: {data.decode()} from {addr[0]}")
             found = True
-    lcd.writeline(2, 'Found Sensor:')
-    lcd.writeline(3, f'{addr[0]}')
+    writeline(2, 'Found Sensor:')
+    writeline(3, f'{addr[0]}')
     sleep(10)
     return addr[0]
 
