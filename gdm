@@ -26,7 +26,7 @@ def writeline(line, text, clear=False):
     if textlen < 19:
         lcd.write_string('{: ^20}'.format(str(text)))
     elif textlen == 19:
-        lcd.write_string(f'{str(text)} ') 
+        lcd.write_string(f'{str(text)} ')
     elif textlen == 20:
         lcd.write_string(str(text))
     else:
@@ -108,15 +108,15 @@ def displaydata(data):
         lcd.write_string(ts)
         lcd.cursor_pos = (1, 0)
         if int(data["darkness"]) < 300000:
-            lcd.write_string(space(f'Lights ON ({data["lightscale"]}/100)'))
+            writeline(2, f'Lights ON ({data["lightscale"]}/100)')
         else:
-            lcd.write_string(space(f'Lights OFF  ({data["lightscale"]}/100)'))
+            writeline(2, f'Lights OFF  ({data["lightscale"]}/100)')
         templine(data)
         lcd.cursor_pos = (3, 0)
         if not data['hasalarms']:
-            lcd.write_string(space('     No Alerts'))
+            writeline(4, 'No Alerts')
         else:
-            lcd.write_string(space(f'ALERT: '))
+            writeline(4, f'ALERT!')
     except:
         log.exception(f'Exception in displaydata()')
     else:
