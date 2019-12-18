@@ -122,7 +122,7 @@ switch = 0
 while True:
     try:
         log.debug('Attempting to retrieve data')
-        with urllib.request.urlopen("http://10.1.10.74/data") as url:
+        with urllib.request.urlopen(f"http://{ipaddr}/data") as url:
             data = json.loads(url.read().decode())
     except:
         log.error('Error getting remote data')
