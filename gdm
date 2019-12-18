@@ -137,3 +137,4 @@ while True:
             disphumiditydata(data)
         except:
             log.exception(f'Exception in main loop')
+        heartbeat(10)
