@@ -99,19 +99,21 @@ def templine(data):
         log.exception(f'Exception in templine()')
 
 
+def displaytime():
+    # datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
+    datetime_object = datetime.now()
+    ts = datetime_object.strftime("%a, %b %d %I:%M %p")
+    writeline(1, ts)
+
+
 def displaydata(data):
     log.info(f'Displaying new data: {data}')
     try:
-        datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
-        ts = datetime_object.strftime("%a, %b %d %I:%M %p")
-        writeline(1, ts)
-        lcd.cursor_pos = (1, 0)
         if int(data["darkness"]) < 300000:
             writeline(2, f'Lights ON ({data["lightscale"]}/100)')
         else:
             writeline(2, f'Lights OFF  ({data["lightscale"]}/100)')
         templine(data)
-        lcd.cursor_pos = (3, 0)
         if not data['hasalarms']:
             writeline(4, 'No Alerts')
         else:
@@ -133,17 +135,29 @@ lcd.clear()
 ipaddr = discover_gsm()
 
 switch = 0
+errorcount = 0
+firstrun = True
 
 while True:
+    if errorcount > 5:
+        ipaddr = discover_gsm()
+    displaytime()
     try:
         log.debug('Attempting to retrieve data')
         with urllib.request.urlopen(f"http://{ipaddr}/data") as url:
             data = json.loads(url.read().decode())
     except:
+        errorcount += 1
         log.error('Error getting remote data')
-        heartbeat(60)
+        if firstrun:
+            sleep(5)
+        else:
+            heartbeat(5)
 
     else:
+        log.debug('Data retrieved successfully')
+        errorcount = 0
+        firstrun = False
         try:
             displaydata(data)
             for a in range(6):
