@@ -13,7 +13,7 @@ from RPLCD.i2c import CharLCD
 logfile = '/var/log/gdm.log'
 
 log.configure(
-    handlers=[dict(sink=sys.stdout, level="ERROR", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
+    handlers=[dict(sink=sys.stdout, level="DEBUG", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
               dict(sink=logfile, level="WARNING", enqueue=True, serialize=False, rotation="50 KB", retention="30 days", compression="gz")],
     levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")])
 
@@ -32,9 +32,13 @@ def discover_gsm():
     while not found:
         client.sendto(b'GSM_DISCOVER', ('255.255.255.255', 37020))
         log.debug(f'Sent GSM_DISCOVER broadcast')
-        (data, addr) = client.recvfrom(1024)
-        log.info(f"Found GSM: {data.decode()} from {addr[0]}")
-        found = True
+        try:
+            (data, addr) = client.recvfrom(1024)
+        except socket.timeout:
+            pass
+        else:
+            log.info(f"Found GSM: {data.decode()} from {addr[0]}")
+            found = True
     lcd.clear()
     lcd.cursor_pos = (1, 0)
     lcd.write_string('Found Sensor:')
