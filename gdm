@@ -6,11 +6,27 @@ import sys
 import urllib.request
 from datetime import datetime
 from time import sleep
+import signal
 
 from loguru import logger as log
 from RPLCD.i2c import CharLCD
 
+main_stop_event = False
+
 logfile = '/var/log/gdm.log'
+signals = (0, 'SIGHUP', 'SIGINT', 'SIGQUIT', 4, 5, 6, 7, 8, 'SIGKILL', 10, 11, 12, 13, 14, 'SIGTERM')
+
+
+def signal_handler(signal, frame):
+    global main_stop_event
+    log.log('EXIT', f'Termination signal [{signals[signal]}] recieved. Exiting.')
+    main_stop_event = True
+
+
+signal.signal(signal.SIGTERM, signal_handler)  # Graceful Shutdown
+signal.signal(signal.SIGHUP, signal_handler)  # Reload/Restart
+signal.signal(signal.SIGINT, signal_handler)  # Hard Exit
+signal.signal(signal.SIGQUIT, signal_handler)  # Hard Exit
 
 log.configure(
     handlers=[dict(sink=sys.stdout, level="DEBUG", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
@@ -74,7 +90,7 @@ def heartbeat(stime):
 
 
 def disptempdata(data):
-    writeline(3, f'Tmp: {data["tempc"]}&#176;F  {data["temptrend"]}&#176;F')
+    writeline(3, f'Tmp: {data["tempc"]}°F  {data["temptrend"]}°F')
 
 
 def disphumiditydata(data):
@@ -112,7 +128,7 @@ switch = 0
 errorcount = 0
 firstrun = True
 
-while True:
+while not main_stop_event:
     if errorcount > 5:
         ipaddr = discover_gsm()
     try:
@@ -138,3 +154,6 @@ while True:
         except:
             log.exception(f'Exception in main loop')
         heartbeat(10)
+writeline(2, 'Please Wait...', clear=True)
+lcd.close()
+log.info('Existing.')
