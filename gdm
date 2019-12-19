@@ -23,7 +23,7 @@ def signal_handler(signal, frame):
     log.warning(f'Termination signal [{signals[signal]}] recieved. Exiting.')
     main_stop_event = True
     lcd.close()
-    exit()
+    exit(0)
 
 
 signal.signal(signal.SIGTERM, signal_handler)  # Graceful Shutdown
