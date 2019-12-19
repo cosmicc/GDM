@@ -112,7 +112,17 @@ def disptempdata(data):
 
 
 def disphumiditydata(data):
-    writeline(4, f'Hum: {data["humidity"]}%  {data["humiditytrend"]}%')
+    lcd.cursor_pos = (3, 0)
+    lcd.write_string('Tmp:')
+    lcd.cursor_pos = (3, 4)
+    temp = str(data["humidity"]).rjust(6, ' ')
+    lcd.write_string(temp)
+    lcd.write_string('%')
+    lcd.cursor_pos = (3, 11)
+    temptrend = str(data["humiditytrend"]).rjust(7, ' ')
+    lcd.write_string(temptrend)
+    lcd.write_string('% ')
+    lcd.home()
 
 
 def displaytime(data):
