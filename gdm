@@ -113,7 +113,7 @@ def disptempdata(data):
 
 def disphumiditydata(data):
     lcd.cursor_pos = (3, 0)
-    lcd.write_string('Tmp:')
+    lcd.write_string('Hum:')
     lcd.cursor_pos = (3, 4)
     temp = str(data["humidity"]).rjust(6, ' ')
     lcd.write_string(temp)
