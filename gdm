@@ -22,6 +22,7 @@ def signal_handler(signal, frame):
     global main_stop_event
     log.warning(f'Termination signal [{signals[signal]}] recieved. Exiting.')
     main_stop_event = True
+    writeline(2, 'Please Wait...', clear=True)
     lcd.close()
     exit(0)
 
@@ -157,6 +158,3 @@ while not main_stop_event:
         except:
             log.exception(f'Exception in main loop')
         heartbeat(10)
-writeline(2, 'Please Wait...', clear=True)
-lcd.close()
-log.info('Existing.')
