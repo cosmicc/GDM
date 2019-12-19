@@ -102,12 +102,12 @@ def disptempdata(data):
     temp = str(data["tempc"]).rjust(5, ' ')
     lcd.write_string(temp)
     lcd.write(223)
-    lcd.write('F')
+    lcd.write_string('F')
     lcd.cursor_pos = (2, 14)
     temptrend = str(data["temptrend"]).rjust(5, ' ')
     lcd.write_string(temptrend)
     lcd.write(223)
-    lcd.write('F')
+    lcd.write_string('F')
     lcd.home()
 
 
