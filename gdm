@@ -17,7 +17,6 @@ main_stop_event = False
 
 logfile = '/var/log/gdm.log'
 signals = (0, 'SIGHUP', 'SIGINT', 'SIGQUIT', 4, 5, 6, 7, 8, 'SIGKILL', 10, 11, 12, 13, 14, 'SIGTERM')
-degree = u'\N{DEGREE SIGN}'
 
 
 def signal_handler(signal, frame):
@@ -35,9 +34,7 @@ signal.signal(signal.SIGINT, signal_handler)  # Hard Exit
 signal.signal(signal.SIGQUIT, signal_handler)  # Hard Exit
 
 log.configure(
-    handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'),
-              dict(sink=logfile, level="WARNING", enqueue=True, serialize=False, rotation="50 KB", retention="30 days", compression="gz")],
-    levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")])
+    handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'), dict(sink=logfile, level="WARNING", enqueue=True, serialize=False)])
 
 
 def writeline(line, text, clear=False):
