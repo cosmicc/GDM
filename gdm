@@ -16,6 +16,7 @@ main_stop_event = False
 
 logfile = '/var/log/gdm.log'
 signals = (0, 'SIGHUP', 'SIGINT', 'SIGQUIT', 4, 5, 6, 7, 8, 'SIGKILL', 10, 11, 12, 13, 14, 'SIGTERM')
+degree = u'\N{DEGREE SIGN}'
 
 
 def signal_handler(signal, frame):
@@ -94,7 +95,7 @@ def heartbeat(stime):
 
 
 def disptempdata(data):
-    writeline(3, f'Tmp: {data["tempc"]}°F  {data["temptrend"]}°F')
+    writeline(3, f'Tmp: {data["tempc"]}{degree}F  {data["temptrend"]}{degree}F')
 
 
 def disphumiditydata(data):
