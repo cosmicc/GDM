@@ -19,7 +19,7 @@ signals = (0, 'SIGHUP', 'SIGINT', 'SIGQUIT', 4, 5, 6, 7, 8, 'SIGKILL', 10, 11, 1
 
 def signal_handler(signal, frame):
     global main_stop_event
-    log.log('EXIT', f'Termination signal [{signals[signal]}] recieved. Exiting.')
+    log.warning(f'Termination signal [{signals[signal]}] recieved. Exiting.')
     main_stop_event = True
 
 
