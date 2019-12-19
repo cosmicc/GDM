@@ -90,7 +90,7 @@ def heartbeat(stime):
         char = ":"
     while stime != 0:
         lcd.cursor_pos = (0, pos)
-        lcd.write_string(char)
+        lcd.write_string(' ')
         sleep(.1)
         lcd.cursor_pos = (0, pos)
         lcd.write_string(char)
