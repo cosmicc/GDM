@@ -82,17 +82,20 @@ def discover_gsm():
 
 
 def heartbeat(stime):
-    try:
-        while stime != 0:
-            lcd.cursor_pos = (0, 14)
-            lcd.write(32)
-            sleep(.1)
-            lcd.cursor_pos = (0, 14)
-            lcd.write(58)
-            sleep(.9)
-            stime -= 1
-    except:
-        log.exception(f'Exception in heatbeat()')
+    if inalarm:
+        pos = 12
+        char = '!'
+    else:
+        pos = 14
+        char = ":"
+    while stime != 0:
+        lcd.cursor_pos = (0, pos)
+        lcd.write_string(char)
+        sleep(.1)
+        lcd.cursor_pos = (0, pos)
+        lcd.write_string(char)
+        sleep(.9)
+        stime -= 1
 
 
 def disptempdata(data):
@@ -127,7 +130,7 @@ def disphumiditydata(data):
 
 def displaytime(data):
     # datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
-    if not data['hasalarms']:
+    if not inalarm:
         datetime_object = datetime.now()
         ts = datetime_object.strftime("%a, %b %d %I:%M %p")
         writeline(1, ts)
@@ -155,6 +158,7 @@ ipaddr = discover_gsm()
 switch = 0
 errorcount = 0
 firstrun = True
+inalarm = False
 
 while not main_stop_event:
     if errorcount > 5:
@@ -174,6 +178,7 @@ while not main_stop_event:
         log.debug('Data retrieved successfully')
         errorcount = 0
         firstrun = False
+        inalarm = data['hasalarms']
         try:
             displaytime(data)
             displightdata(data)
