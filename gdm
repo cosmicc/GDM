@@ -96,7 +96,19 @@ def heartbeat(stime):
 
 
 def disptempdata(data):
-    writeline(3, f'Tmp: {data["tempc"]}°F  {data["temptrend"]}°F')
+    lcd.cursor_pos = (2, 0)
+    lcd.write_string('Tmp:')
+    lcd.cursor_pos = (2, 5)
+    temp = str(data["tempc"]).rjust(5, ' ')
+    lcd.write_string(temp)
+    lcd.write(223)
+    lcd.write('F')
+    lcd.cursor_pos = (2, 14)
+    temptrend = str(data["temptrend"]).rjust(5, ' ')
+    lcd.write_string(temptrend)
+    lcd.write(223)
+    lcd.write('F')
+    lcd.home()
 
 
 def disphumiditydata(data):
