@@ -141,7 +141,7 @@ def main():
     main_stop_event = False
     logfile = '/var/log/gdm.log'
     log.configure(
-    handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'), dict(sink=logfile, level="WARNING", enqueue=True, serialize=False)])
+    handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'), dict(sink=logfile, level="WARNING", enqueue=True, serialize=False)], levels=[dict(name="STARTUP", no=38, icon="¤", color="<yellow>")])
     pidfile = pid.PidFile('gdm')
     try:
         pidfile.create()
