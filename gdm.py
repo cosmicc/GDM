@@ -17,6 +17,8 @@ from RPLCD.i2c import CharLCD
 
 signals = (0, 'SIGHUP', 'SIGINT', 'SIGQUIT', 4, 5, 6, 7, 8, 'SIGKILL', 10, 11, 12, 13, 14, 'SIGTERM')
 
+lcd = CharLCD('PCF8574', 0x27)
+lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=True, backlight_enabled=True)
 
 def signal_handler(signal, frame):
     global main_stop_event
@@ -154,8 +156,7 @@ def main():
 
     log.log('STARTUP', 'GDM is starting up')
     log.info(f'Initilizing LCD display')
-    lcd = CharLCD('PCF8574', 0x27)
-    lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=20, rows=4, dotsize=8, charmap='A02', auto_linebreaks=True, backlight_enabled=True)
+
 
     log.debug(f'Clearing LCD display')
     lcd.clear()
