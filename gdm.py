@@ -26,7 +26,6 @@ def signal_handler(signal, frame):
     log.warning(f'Termination signal [{signals[signal]}] recieved. Exiting.')
     main_stop_event = True
     writeline(2, 'Please Wait...', clear=True)
-    lcd.close()
     exit(0)
 
 
@@ -34,9 +33,6 @@ signal.signal(signal.SIGTERM, signal_handler)  # Graceful Shutdown
 signal.signal(signal.SIGHUP, signal_handler)  # Reload/Restart
 signal.signal(signal.SIGINT, signal_handler)  # Hard Exit
 signal.signal(signal.SIGQUIT, signal_handler)  # Hard Exit
-
-log.configure(
-    handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'), dict(sink=logfile, level="WARNING", enqueue=True, serialize=False)])
 
 
 def writeline(line, text, clear=False):
@@ -145,6 +141,8 @@ def displightdata(data):
 
 
 def main():
+    log.configure(
+    handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'), dict(sink=logfile, level="WARNING", enqueue=True, serialize=False)])
     pidfile = pid.PidFile('gdm')
     try:
         pidfile.create()
@@ -153,7 +151,7 @@ def main():
         exit(1)
     except:
         log.exception('PID file error:')
-        exit(1)
+        exit(1)d
     log.log('STARTUP', 'GDM is starting up')
     log.info(f'Initilizing LCD display')
     lcd = CharLCD('PCF8574', 0x27)
@@ -196,7 +194,8 @@ def main():
             except:
                 log.exception(f'Exception in main loop')
             heartbeat(10)
+    lcd.close()
 
 
-with daemon.DaemonContext():
+if __name__ == '__main__':
     main()
