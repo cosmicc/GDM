@@ -75,7 +75,7 @@ def discover_gsm():
     return addr[0]
 
 
-def heartbeat(stime):
+def heartbeat(stime, inalarm):
     if inalarm:
         pos = 12
         char = '!'
@@ -182,7 +182,7 @@ def main():
             if firstrun:
                 sleep(5)
             else:
-                heartbeat(5)
+                heartbeat(5, inalarm)
         else:
             log.debug('Data retrieved successfully')
             errorcount = 0
@@ -195,7 +195,7 @@ def main():
                 disphumiditydata(data)
             except:
                 log.exception(f'Exception in main loop')
-            heartbeat(10)
+            heartbeat(10, inalarm)
     lcd.close()
 
 
