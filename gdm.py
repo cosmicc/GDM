@@ -151,7 +151,7 @@ def main():
         exit(1)
     except:
         log.exception('PID file error:')
-        exit(1)d
+        exit(1)
     log.log('STARTUP', 'GDM is starting up')
     log.info(f'Initilizing LCD display')
     lcd = CharLCD('PCF8574', 0x27)
