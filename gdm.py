@@ -124,6 +124,7 @@ def disphumiditydata(data):
 
 def displaytime(data):
     # datetime_object = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M')
+    inalarm = data['hasalarms']
     if not inalarm:
         datetime_object = datetime.now()
         ts = datetime_object.strftime("%a, %b %d %I:%M %p")
