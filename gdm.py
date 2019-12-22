@@ -15,9 +15,6 @@ from time import sleep
 from loguru import logger as log
 from RPLCD.i2c import CharLCD
 
-main_stop_event = False
-
-logfile = '/var/log/gdm.log'
 signals = (0, 'SIGHUP', 'SIGINT', 'SIGQUIT', 4, 5, 6, 7, 8, 'SIGKILL', 10, 11, 12, 13, 14, 'SIGTERM')
 
 
@@ -141,6 +138,8 @@ def displightdata(data):
 
 
 def main():
+    main_stop_event = False
+    logfile = '/var/log/gdm.log'
     log.configure(
     handlers=[dict(sink=sys.stdout, level="INFO", backtrace=True, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'), dict(sink=logfile, level="WARNING", enqueue=True, serialize=False)])
     pidfile = pid.PidFile('gdm')
@@ -152,6 +151,7 @@ def main():
     except:
         log.exception('PID file error:')
         exit(1)
+
     log.log('STARTUP', 'GDM is starting up')
     log.info(f'Initilizing LCD display')
     lcd = CharLCD('PCF8574', 0x27)
